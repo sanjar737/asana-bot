@@ -1,0 +1,9 @@
+name: "asana-bot"
+description: "add pr link to task"
+inputs:
+  github_token:
+    description: "The GITHUB_TOKEN secret"
+    required: true
+runs:
+  using: "node12"
+  main: "dist/index.js"
