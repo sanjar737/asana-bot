@@ -2,9 +2,10 @@
   "name": "asana-bot",
   "version": "0.0.1",
   "description": "asana bot",
-  "main": "index.js",
+  "main": "src/index.ts",
   "scripts": {
-    "build": "tsc"
+    "build": "ncc build --source-map --license licenses.txt",
+    "tsc": "tsc"
   },
   "author": "sanjar737",
   "license": "ISC",
@@ -16,6 +17,7 @@
   "devDependencies": {
     "@types/asana": "^0.18.11",
     "@types/node": "^18.8.3",
+    "@vercel/ncc": "^0.34.0",
     "typescript": "^4.8.4"
   }
 }
