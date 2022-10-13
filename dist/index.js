@@ -9707,7 +9707,7 @@ async function getDiff() {
 }
 async function run() {
     try {
-        const diff = getDiff();
+        const diff = await getDiff();
         (0, core_1.info)("diff");
         console.log(diff);
     }
