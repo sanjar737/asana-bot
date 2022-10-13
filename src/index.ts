@@ -23,7 +23,7 @@ async function getDiff() {
 
 async function run() {
   try {
-    const diff = getDiff();
+    const diff = await getDiff();
     info("diff");
     console.log(diff);
   } catch (error) {
