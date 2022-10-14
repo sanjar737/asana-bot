@@ -9693,26 +9693,51 @@ const github_1 = __nccwpck_require__(5438);
 const githubToken = (0, core_1.getInput)("github_token", { required: true });
 const octokit = (0, github_1.getOctokit)(githubToken);
 async function getDiff() {
-    if (githubToken && github_1.context.payload.pull_request) {
-        const result = await octokit.rest.repos.compareCommits({
-            repo: github_1.context.repo.repo,
-            owner: github_1.context.repo.owner,
-            head: github_1.context.payload.pull_request.head.sha,
-            base: github_1.context.payload.pull_request.base.sha,
-            per_page: 100,
-        });
-        return result.data.files || [];
-    }
-    return [];
-}
-async function run() {
     try {
-        const diff = getDiff();
-        (0, core_1.info)("diff");
-        console.log(diff);
+        if (githubToken && github_1.context.payload.pull_request) {
+            const result = await octokit.rest.repos.compareCommits({
+                repo: github_1.context.repo.repo,
+                owner: github_1.context.repo.owner,
+                head: github_1.context.payload.pull_request.head.sha,
+                base: github_1.context.payload.pull_request.base.sha,
+                per_page: 100,
+            });
+            return result.data.files || [];
+        }
+        return [];
     }
     catch (error) {
         (0, core_1.setFailed)(error.message);
+    }
+}
+function findSubstring(target, str) {
+    const reg = new RegExp(target, "g");
+    return !!str.match(reg);
+}
+function hasDataTestId(diff) {
+    const hasDataTestId = diff.some((file) => {
+        if (!file.patch) {
+            return false;
+        }
+        return findSubstring("\\+.*data-test-id", file.patch);
+    });
+    const message = hasDataTestId ? "pr has dti" : "pr doesnt has dti";
+    (0, core_1.info)(message);
+    return hasDataTestId;
+}
+async function hasTest(diff) {
+    const hasTest = diff.some((file) => {
+        return findSubstring("\\.spec", file.filename);
+    });
+    const message = hasTest ? "pr has test" : "pr doesnt has test";
+    (0, core_1.info)(message);
+    return hasTest;
+}
+async function run() {
+    const diff = await getDiff();
+    if (diff) {
+        hasDataTestId(diff);
+        hasTest(diff);
     }
 }
 run();
