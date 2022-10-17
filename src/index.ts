@@ -47,10 +47,12 @@ function hasDataTestId(diff: components["schemas"]["diff-entry"][]) {
   return hasDataTestId;
 }
 
-async function hasTest(diff: components["schemas"]["diff-entry"][]) {
-  const hasTest = diff.some((file) => {
-    return findSubstring("\\.spec", file.filename);
-  });
+function hasTest(diff: components["schemas"]["diff-entry"][]) {
+  const hasTest = diff
+    .filter((file) => file.status === "added")
+    .some((file) => {
+      return findSubstring("\\.spec", file.filename);
+    });
 
   const message = hasTest ? "pr has test" : "pr doesnt has test";
 
@@ -61,10 +63,33 @@ async function hasTest(diff: components["schemas"]["diff-entry"][]) {
 async function run() {
   const diff = await getDiff();
 
-  if (diff) {
-    hasDataTestId(diff);
-    hasTest(diff);
+  if (!diff || !context.payload.pull_request) {
+    return;
   }
+
+  let pullRequestBody = context.payload.pull_request?.body || "";
+
+  if (hasDataTestId(diff)) {
+    pullRequestBody = pullRequestBody.replace(
+      /\[.](?=.*Добавил\(а\) data-test-id)/,
+      "[x]"
+    );
+  }
+  if (hasTest(diff)) {
+    pullRequestBody = pullRequestBody.replace(
+      /\[.](?=.*Написал\(а\) unit-тесты)/,
+      "[x]"
+    );
+  }
+
+  const params = {
+    owner: context.repo.owner,
+    repo: context.repo.repo,
+    pull_number: context.payload.pull_request.number,
+    body: pullRequestBody,
+  };
+
+  octokit.rest.pulls.update(params);
 }
 
 run();
