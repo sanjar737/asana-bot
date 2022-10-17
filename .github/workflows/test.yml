@@ -1,0 +1,16 @@
+name: "build-test"
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+jobs:
+  asana-bot:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: asana-bot
+        uses: ./
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
